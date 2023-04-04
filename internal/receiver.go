@@ -39,6 +39,7 @@ func NewReceiver(log *log.Logger, defaultNamespace string, defaultSubsystem stri
 			Subsystem: metric.Subsystem,
 			Type:      metric.Type,
 			Name:      metric.Name,
+			Labels:    metric.Labels,
 		}
 
 		if err := r.metrics[metric.GetFullName()].Register(); err != nil {
@@ -94,7 +95,7 @@ func (r *Receiver) Run(ctx context.Context) (err error) {
 			continue
 		}
 
-		r.log.Print(string(buf))
+		// r.log.Print(string(buf))
 
 		var msg Message
 		err = json.Unmarshal(buf[:n], &msg)
