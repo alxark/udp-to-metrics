@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 	"github.com/prometheus/client_golang/prometheus"
-	"log"
 )
 
 type Message struct {
@@ -102,10 +101,7 @@ func (m *Metric) HandleMessage(msg Message) error {
 		} else {
 			switch msg.Command {
 			case "inc":
-				log.Print("incremented")
-
 				m.counter.Inc()
-				log.Print(m.counter)
 			case "add":
 				m.counter.Add(msg.Value)
 			default:

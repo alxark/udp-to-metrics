@@ -95,8 +95,6 @@ func (r *Receiver) Run(ctx context.Context) (err error) {
 			continue
 		}
 
-		// r.log.Print(string(buf))
-
 		var msg Message
 		err = json.Unmarshal(buf[:n], &msg)
 		if err != nil {
