@@ -77,6 +77,24 @@ func (m *Metric) Register() error {
 			})
 			return prometheus.Register(m.counter)
 		}
+	case "histogram":
+	    if len(m.Labels) > 0 {
+            m.histogramVec = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+                Namespace: m.Namespace,
+                Subsystem: m.Subsystem,
+                Name:      m.Name,
+                Help:      m.Help,
+            }, m.Labels)
+            return prometheus.Register(m.histogramVec)
+        } else {
+            m.histogram = prometheus.NewHistogram(prometheus.CounterOpts{
+                Namespace: m.Namespace,
+                Subsystem: m.Subsystem,
+                Name:      m.Name,
+                Help:      m.Help,
+            })
+            return prometheus.Register(m.histogram)
+        }
 	default:
 		return errors.New("no such metric type")
 	}
@@ -108,6 +126,17 @@ func (m *Metric) HandleMessage(msg Message) error {
 				return errors.New("invalid command")
 			}
 		}
+	case "histogram":
+        if len(m.Labels) != len(msg.Labels) {
+            return errors.New("invalid number of labels")
+        }
+
+        switch msg.Command {
+        case "observe":
+            m.counterVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
+        default:
+            return errors.New("invalid command")
+        }
 	default:
 		return errors.New("no such metric type")
 	}
