@@ -19,6 +19,7 @@ type Metric struct {
 	Name      string   `json:"name"`
 	Labels    []string `json:"labels"`
 	Help      string   `json:"help"`
+	Buckets   []float64 `json:"buckets"`
 
 	gaugeVec *prometheus.GaugeVec
 	gauge    prometheus.Gauge
@@ -84,6 +85,7 @@ func (m *Metric) Register() error {
                 Subsystem: m.Subsystem,
                 Name:      m.Name,
                 Help:      m.Help,
+                Buckets:   m.Buckets
             }, m.Labels)
             return prometheus.Register(m.histogramVec)
         } else {
@@ -92,6 +94,7 @@ func (m *Metric) Register() error {
                 Subsystem: m.Subsystem,
                 Name:      m.Name,
                 Help:      m.Help,
+                Buckets:   m.Buckets
             })
             return prometheus.Register(m.histogram)
         }
