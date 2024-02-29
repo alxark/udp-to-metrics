@@ -40,7 +40,7 @@ func NewReceiver(log *log.Logger, defaultNamespace string, defaultSubsystem stri
 			Type:      metric.Type,
 			Name:      metric.Name,
 			Labels:    metric.Labels,
-			Buckets:    metric.Buckets
+			Buckets:    metric.Buckets,
 		}
 
 		if err := r.metrics[metric.GetFullName()].Register(); err != nil {

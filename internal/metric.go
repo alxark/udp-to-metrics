@@ -85,7 +85,7 @@ func (m *Metric) Register() error {
                 Subsystem: m.Subsystem,
                 Name:      m.Name,
                 Help:      m.Help,
-                Buckets:   m.Buckets
+                Buckets:   m.Buckets,
             }, m.Labels)
             return prometheus.Register(m.histogramVec)
         } else {
@@ -94,7 +94,7 @@ func (m *Metric) Register() error {
                 Subsystem: m.Subsystem,
                 Name:      m.Name,
                 Help:      m.Help,
-                Buckets:   m.Buckets
+                Buckets:   m.Buckets,
             })
             return prometheus.Register(m.histogram)
         }
