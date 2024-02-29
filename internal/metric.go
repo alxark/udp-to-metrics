@@ -19,12 +19,16 @@ type Metric struct {
 	Name      string   `json:"name"`
 	Labels    []string `json:"labels"`
 	Help      string   `json:"help"`
+	Buckets   []float64 `json:"buckets"`
 
 	gaugeVec *prometheus.GaugeVec
 	gauge    prometheus.Gauge
 
 	counter    prometheus.Counter
 	counterVec *prometheus.CounterVec
+
+	histogramVec *prometheus.HistogramVec
+	histogram    prometheus.Histogram
 }
 
 func (m *Metric) GetFullName() string {
@@ -77,6 +81,26 @@ func (m *Metric) Register() error {
 			})
 			return prometheus.Register(m.counter)
 		}
+	case "histogram":
+	    if len(m.Labels) > 0 {
+            m.histogramVec = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+                Namespace: m.Namespace,
+                Subsystem: m.Subsystem,
+                Name:      m.Name,
+                Help:      m.Help,
+                Buckets:   m.Buckets,
+            }, m.Labels)
+            return prometheus.Register(m.histogramVec)
+        } else {
+            m.histogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+                Namespace: m.Namespace,
+                Subsystem: m.Subsystem,
+                Name:      m.Name,
+                Help:      m.Help,
+                Buckets:   m.Buckets,
+            })
+            return prometheus.Register(m.histogram)
+        }
 	default:
 		return errors.New("no such metric type")
 	}
@@ -108,6 +132,26 @@ func (m *Metric) HandleMessage(msg Message) error {
 				return errors.New("invalid command")
 			}
 		}
+	case "histogram":
+        if len(m.Labels) != len(msg.Labels) {
+            return errors.New("invalid number of labels")
+        }
+
+        if len(m.Labels) > 0 {
+            switch msg.Command {
+            case "observe":
+                m.histogramVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
+            default:
+                return errors.New("invalid command")
+            }
+        } else {
+            switch msg.Command {
+            case "observe":
+                m.histogram.Observe(msg.Value)
+            default:
+                return errors.New("invalid command")
+            }
+        }
 	default:
 		return errors.New("no such metric type")
 	}
