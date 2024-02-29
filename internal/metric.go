@@ -26,6 +26,9 @@ type Metric struct {
 
 	counter    prometheus.Counter
 	counterVec *prometheus.CounterVec
+
+	histogramVec *prometheus.HistogramVec
+	histogram    prometheus.Histogram
 }
 
 func (m *Metric) GetFullName() string {
