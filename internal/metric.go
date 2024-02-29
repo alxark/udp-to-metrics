@@ -92,7 +92,7 @@ func (m *Metric) Register() error {
             }, m.Labels)
             return prometheus.Register(m.histogramVec)
         } else {
-            m.histogram = prometheus.NewHistogram(prometheus.CounterOpts{
+            m.histogram = prometheus.NewHistogram(prometheus.HistogramOpts{
                 Namespace: m.Namespace,
                 Subsystem: m.Subsystem,
                 Name:      m.Name,
