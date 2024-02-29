@@ -137,7 +137,7 @@ func (m *Metric) HandleMessage(msg Message) error {
             return errors.New("invalid number of labels")
         }
 
-        if len(m.Labels) > 0
+        if len(m.Labels) > 0 {
             switch msg.Command {
             case "observe":
                 m.histogramVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
