@@ -137,11 +137,20 @@ func (m *Metric) HandleMessage(msg Message) error {
             return errors.New("invalid number of labels")
         }
 
-        switch msg.Command {
-        case "observe":
-            m.counterVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
-        default:
-            return errors.New("invalid command")
+        if len(m.Labels) > 0
+            switch msg.Command {
+            case "observe":
+                m.histogramVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
+            default:
+                return errors.New("invalid command")
+            }
+        } else {
+            switch msg.Command {
+            case "observe":
+                m.histogram.WithLabelValues(msg.Labels...).Observe(msg.Value)
+            default:
+                return errors.New("invalid command")
+            }
         }
 	default:
 		return errors.New("no such metric type")
