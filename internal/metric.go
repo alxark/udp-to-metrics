@@ -147,7 +147,7 @@ func (m *Metric) HandleMessage(msg Message) error {
         } else {
             switch msg.Command {
             case "observe":
-                m.histogram.WithLabelValues(msg.Labels...).Observe(msg.Value)
+                m.histogram.Observe(msg.Value)
             default:
                 return errors.New("invalid command")
             }
