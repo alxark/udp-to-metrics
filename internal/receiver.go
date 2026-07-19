@@ -60,6 +60,7 @@ func NewReceiver(log *log.Logger, defaultNamespace string, defaultSubsystem stri
 			Type:      metric.Type,
 			Name:      metric.Name,
 			Labels:    metric.Labels,
+			Buckets:   metric.Buckets,
 			Help:      metric.Help,
 		}
 

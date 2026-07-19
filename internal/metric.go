@@ -13,18 +13,22 @@ type Message struct {
 }
 
 type Metric struct {
-	Namespace string   `json:"namespace"`
-	Subsystem string   `json:"subsystem"`
-	Type      string   `json:"type"`
-	Name      string   `json:"name"`
-	Labels    []string `json:"labels"`
-	Help      string   `json:"help"`
+	Namespace string    `json:"namespace"`
+	Subsystem string    `json:"subsystem"`
+	Type      string    `json:"type"`
+	Name      string    `json:"name"`
+	Labels    []string  `json:"labels"`
+	Help      string    `json:"help"`
+	Buckets   []float64 `json:"buckets"`
 
 	gaugeVec *prometheus.GaugeVec
 	gauge    prometheus.Gauge
 
 	counter    prometheus.Counter
 	counterVec *prometheus.CounterVec
+
+	histogramVec *prometheus.HistogramVec
+	histogram    prometheus.Histogram
 }
 
 func (m *Metric) collector() prometheus.Collector {
@@ -90,6 +94,26 @@ func (m *Metric) Register() error {
 			})
 			return prometheus.Register(m.counter)
 		}
+	case "histogram":
+		if len(m.Labels) > 0 {
+			m.histogramVec = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+				Namespace: m.Namespace,
+				Subsystem: m.Subsystem,
+				Name:      m.Name,
+				Help:      m.Help,
+				Buckets:   m.Buckets,
+			}, m.Labels)
+			return prometheus.Register(m.histogramVec)
+		} else {
+			m.histogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+				Namespace: m.Namespace,
+				Subsystem: m.Subsystem,
+				Name:      m.Name,
+				Help:      m.Help,
+				Buckets:   m.Buckets,
+			})
+			return prometheus.Register(m.histogram)
+		}
 	default:
 		return errors.New("no such metric type")
 	}
@@ -117,6 +141,26 @@ func (m *Metric) HandleMessage(msg Message) error {
 				m.counter.Inc()
 			case "add":
 				m.counter.Add(msg.Value)
+			default:
+				return errors.New("invalid command")
+			}
+		}
+	case "histogram":
+		if len(m.Labels) != len(msg.Labels) {
+			return errors.New("invalid number of labels")
+		}
+
+		if len(m.Labels) > 0 {
+			switch msg.Command {
+			case "observe":
+				m.histogramVec.WithLabelValues(msg.Labels...).Observe(msg.Value)
+			default:
+				return errors.New("invalid command")
+			}
+		} else {
+			switch msg.Command {
+			case "observe":
+				m.histogram.Observe(msg.Value)
 			default:
 				return errors.New("invalid command")
 			}
