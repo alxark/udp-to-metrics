@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/alxark/udp-to-metrics/internal"
 	"log"
+	"os"
 )
 
 // main function, create Application instance and run it
@@ -13,7 +14,15 @@ func main() {
 		logger.Fatal("failed to create application: ", err.Error())
 	}
 
-	if err := app.Run(); err != nil {
-		logger.Fatal("run failed: ", err.Error())
+	result, err := app.Run(os.Args[1:])
+	if err != nil {
+		logger.Print("run failed: ", err.Error())
+		os.Exit(1)
 	}
+
+	if result.Signal != 0 {
+		exitWithSignal(result.Signal)
+	}
+
+	os.Exit(result.Code)
 }

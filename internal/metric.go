@@ -27,6 +27,19 @@ type Metric struct {
 	counterVec *prometheus.CounterVec
 }
 
+func (m *Metric) collector() prometheus.Collector {
+	switch {
+	case m.gaugeVec != nil:
+		return m.gaugeVec
+	case m.gauge != nil:
+		return m.gauge
+	case m.counterVec != nil:
+		return m.counterVec
+	default:
+		return m.counter
+	}
+}
+
 func (m *Metric) GetFullName() string {
 	return m.Namespace + "_" + m.Subsystem + "_" + m.Name
 }

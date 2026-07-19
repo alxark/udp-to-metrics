@@ -1,0 +1,8 @@
+[
+  {
+    "type": "counter",
+    "name": "test_events",
+    "help": "Number of local test events",
+    "labels": ["source"]
+  }
+]
